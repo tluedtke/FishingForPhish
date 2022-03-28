@@ -27,6 +27,7 @@ import validators
 from PIL import Image
 import imagehash
 
+### Terry ###
 
 class initialize():
     '''A class for initializing Selenium, Beautiful Soup, and the project filesystem'''
