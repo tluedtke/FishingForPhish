@@ -27,7 +27,11 @@ import validators
 from PIL import Image
 import imagehash
 
-
+### Terry ### Normally a class (and the moudule/file it is in) are named for the activity the user is trying to accomplish.
+### Terry ### initialization is just a necessity for preparing for that activity. Also, you want classes to be distinct between modules.
+### Terry ### "initialize" is too common a task. A better name for the module and class would be PhishFisher.fisher. 
+### Terry ### 
+### Terry ### Normally empty parens are dropped from a class definition.
 class initialize():
     '''A class for initializing Selenium, Beautiful Soup, and the project filesystem'''
 
@@ -41,6 +45,25 @@ class initialize():
         self.dataDir = dataDir
         self.driver = driver
         self.BS = BS
+        ### Terry ### You could eliminate the repeated code (creating subdirs for "data" and creating for non-"data" by creating
+        ### Terry ### the data directory first. Also, simplify code and maintenance by looping throug a list of subidrectory names.
+        ### Terry ### That way, if you need to add a new subdir, you can modify only one line, or if you need to change the code that handles
+        ### Terry ### subdirectories, you have to do it only once, not for each subdirectory.
+        ### Terry ###
+        ### Terry ### Interesting that there are two different ways to avoid/ignore exisging directories (if isdir and try/except exists).
+        ### Terry ### 
+        ### Terry ### if not os.path.isdir(self.dataDir):
+        ### Terry ###     if self.dataDir == "data":
+        ### Terry ###         os.mkdir("data")
+        ### Terry ###     else
+        ### Terry ###         raise FileNotFoundError("""dataDir needs to be a valid directory""")
+        ### Terry ###
+        ### Terry ### # We know the directory exists now, whether it was default "data" or otherwise, so next tasks are the same
+        ### Terry ### for subdir in ("screenshots", "html", "css", "datasets"):
+        ### Terry ###     dir = self.dataDir + "/" + subdir
+        ### Terry ###     if if not os.path.isdir(dir):
+        ### Terry ###        os.mkdir(dir)
+        ### Terry ### 
         if not os.path.isdir(self.dataDir) and self.dataDir != "data":
             raise FileNotFoundError("""dataDir needs to be a valid directory""")
         elif os.path.isdir(self.dataDir):
