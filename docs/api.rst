@@ -34,6 +34,10 @@ The initialize class has 3 attributes:
       
 The initialize class has 4 methods in addition to __init__() and initializeAll():
 
+### Terry ### Method documention doesn't usually include the self attribute since the language provides that automatically. 
+### Terry ### For example https://devdocs.io/python~3.10/library/bz2#bz2.BZ2Compressor.compress shows only the data attribute
+### Terry ### If you're using a style-guide that requires showing the self attribute, ignore this comment
+
 * installResources(self)
       Installs potentially-useful resources used during the methodology of the research here: TODO. This includes the chiSquaredAttributeEval feature selector for WEKA, the SMOTE oversampler for WEKA, and the Wayback Machine add-on for Firefox.
 * initializeSelenium(self, add_ons=None)
