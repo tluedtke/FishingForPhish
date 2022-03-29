@@ -27,7 +27,10 @@ import validators
 from PIL import Image
 import imagehash
 
-### Terry ###
+### Terry ### Naming a module classes and a class initialize is too generic (and risks clashing with other generic modules).
+### Terry ### Module and class names should match what the developer is trying to do, in this case find Phish. So maybe
+### Terry ### the module/file and class could be named something like PhishFisher.fisher. Class fisher would still have an __init__ 
+### Terry ### for all ofthe required initialization.
 
 class initialize():
     '''A class for initializing Selenium, Beautiful Soup, and the project filesystem'''
@@ -42,6 +45,25 @@ class initialize():
         self.dataDir = dataDir
         self.driver = driver
         self.BS = BS
+        ### Terry ###
+        ### Terry ### Avoid repeating code to do the same action on different strings. Using a for loop 
+        ### Terry ### makes the code more consice and easier to maintain if you need to add another subdirectory
+        ### Terry ### or perform another action on all subdirectories. Also, the code for the default "data" dir
+        ### Terry ### and a provided custom dir are nearly identical (except that one uses if statements and the 
+        ### Terry ### other exceptons to ignore existing directories. 
+        ### Terry ###   
+        ### Terry ###   if not os.path.isdir(self.dataDir):
+        ### Terry ###       if self.dataDir == "data":
+        ### Terry ###           os.mkdir("data")
+        ### Terry ###       else:
+        ### Terry ###           raise FileNotFoundError("""dataDir needs to be a valid directory""")
+        ### Terry ###   # We know the directory exists now so check/create subdirs
+        ### Terry ###   # For extra credit, us map to convert the list of subdirs into full dir paths within the for statement.
+        ### Terry ###   for subdir in ("screenshots", "html", "css", "datasets"):
+        ### Terry ###       dir = self.dataDir + "/" + subdir
+        ### Terry ###       if not os.path.isdir(dir):
+        ### Terry ###           os.mkdir(dir)
+        ### Terry ###   
         if not os.path.isdir(self.dataDir) and self.dataDir != "data":
             raise FileNotFoundError("""dataDir needs to be a valid directory""")
         elif os.path.isdir(self.dataDir):
@@ -85,12 +107,13 @@ class initialize():
         options.add_argument('--hide-scrollbars')
         options.add_argument('--disable-gpu')
         driver = webdriver.Firefox(options=options)
-        if add_ons:
+        if add_ons: ### Terry ### if statement isn't necessary if the defaulf or add_ons is () rather than None.
             for add_on in add_ons:
                 if add_on[len(add_on) - 4:len(add_on)].upper() == ".XPI":
                     try:
                         driver.install_addon(add_on, temporary=True)
                     except Exception:
+                        ### Terry ### log the exception here, just in case, for troubleshooting
                         continue
         self.driver = driver
         self.driver.implicitly_wait(20)
@@ -110,7 +133,7 @@ class initialize():
         options = ["system_cp", "packages"]
         requests.packages.urllib3.disable_warnings(
             category=InsecureRequestWarning)
-        cssutils.log.setLevel(logging.CRITICAL)
+        cssutils.log.setLevel(logging.CRITICAL)  ### Terry ### Love logging
         self.initializePWW3(options)
         self.installResources()
         options = ['wayback_machine-3.0-fx.xpi']
@@ -158,10 +181,20 @@ class scrape(initialize):
                 """urlFile needs to be a path to a file with urls!""")
         else:
             with open(self.urlFile, "r") as f:
+                ### Terry ### From the docs (since you're looping anyway):
+                ### Terry ### For reading lines from a file, you can loop over the file object. This is memory efficient, fast, and leads to simple code:
+                ### Terry ### 
+                ### Terry ### >>>
+                ### Terry ### >>> for line in f:
+                ### Terry ### ...     print(line, end='')
+                ### Terry ### ...
+                ### Terry ### This is the first line of the file.
+                ### Terry ### Second line of the file
                 urls = f.readlines()
                 for url in urls:
                     url = url.replace("\n", "")
-                    url = url.replace(" ", "")
+                    ### Terry ### Assuming you're stripping leading and trailing spaces, and not internal spaces, use https://www.w3schools.com/python/ref_string_strip.asp
+                    url = url.replace(" ", "") 
                     if not validators.url(url):
                         raise ValueError(
                             """Sorry, are you sure urlFile contains valid urls?""")
@@ -169,7 +202,9 @@ class scrape(initialize):
             if not os.path.isdir(self.screenshotDir):
                 raise FileNotFoundError(
                     """screenshotDir needs to be a path to a directory with screenshots!""")
-            toggle = 0
+            ### Terry ### What is being toggled? Can you use a boolean that describes the reason is being extracted from the fist line?
+            ### Terry ### Maybe extractedID = False, or maybe use if not self.id: instead of another variable
+            toggle = 0 ### Terry ### What is being toggled? Can you use a boolean that describes 
             for filename in os.listdir(self.screenshotDir):
                 if toggle == 0:
                     self.id = filename[0:2]
@@ -188,7 +223,8 @@ class scrape(initialize):
                         self.id = filename[0:2]
                         self.id = self.id.replace("_", "")
                         self.id = int(self.id)
-                        toggle += 1
+                        toggle += 1 ### Terry ### is this an inconsistent use of toggle with self.id == 0 ?
+                    ### Terry ### Consider using os.path (or pathlib) to extract the extension in an OS independent way
                     if filename[len(filename) -
                                 5:len(filename)].upper() != ".HTML":
                         raise ValueError(
@@ -270,6 +306,8 @@ class scrape(initialize):
         filename = "_" + str(self.id) + "_" + filename
         return filename
 
+    ### Terry ### Does saveScreenshot assume that siteValidation was called first to retrievethe URL? If so, it should 
+    ### Terry ### check that the URL was retrieved (to help developers who forget to call in order).
     def saveScreenshot(self, url):
         '''Method for saving a screenshot of the full website. Scrolls the page (if possible) to get
         the height and width of a website. A minimum height and width of 10000 (unlikely to ever
@@ -322,6 +360,10 @@ class scrape(initialize):
             return False
         return True, url
 
+    ### Terry ### If you want a particular string format, can you use strftime() instead of parsing the string? 
+    ### Terry ### Note, assuming a particular string format, if you don't explicitly specify it (e.g. str(now)) is brittle
+    ### Terry ### time = datetime.now().strftime("%H:%M:%S")
+    ### Terry ### https://www.w3schools.com/python/gloss_python_date_format_codes.asp
     def getTime(self):
         '''Generates a time value (dependent on location; the time used for the database at TODO is in
         Central time.'''
@@ -354,6 +396,7 @@ class page(scrape):
         '''Searches through the html of a url to get the specified page-features.
         These features are defined in the research paper at TODO.'''
         # Search for elements with links
+        ### Terry ### Whenand where was the URL loaded?
         aTags = self.driver.find_elements(By.TAG_NAME, "a")
         numLinks = len(aTags)
         features = []
@@ -367,23 +410,24 @@ class page(scrape):
         # The search is on!
         # Iterate through <a> tags, and check for link attributes
         if len(aTags) != 0:
-            m = 0
+            m = 0 ### Terry ### Use a more descriptive name (tagCount?)
             for element in aTags:
-                # A time.sleep is added so the webdriver can process the element accordingly.
+                # A time.sleep is added so the webdriver can process the element accordingly. 
                 # In addition to a limit of 1000 <a> tags
                 time.sleep(0.01)
                 if m >= 1000:
                     break
                 try:
-                    parsed = parse.urlparse(url)
+                    parsed = parse.urlparse(url) ### Terry ### Is the same URL parsed over and over?
                 except Exception as e:
                     self.errors.update(url=e)
                     break
                 # Check all <a> for the href element
+                ### Terry ### I don't follow the repeated find_elements or repeated get_attribute calls in the exceptions
                 try:
                     href = element.get_attribute("href")
                 except Exception:
-                    newTags = self.driver.find_elements(By.TAG_NAME, "a")
+                    newTags = self.driver.find_elements(By.TAG_NAME, "a") 
                     try:
                         href = newTags[m].get_attribute("href")
                     except Exception as e:
@@ -464,16 +508,16 @@ class page(scrape):
         features by using Selenium and Beautiful Soup analysis'''
         # Begin to scrape using provided urls
         with open(self.urlFile, "r") as f:
-            urls = f.readlines()
+            urls = f.readlines() ### Terry ### End the with statement after slurping the file. Alternatively loop on the file rather than use readlines()
             self.pageFeatures = [None] * len(urls)
-            i = 0
+            i = 0 ### Terry ### What is "i"
             for url in urls:
                 if not self.siteValidation(url):
                     if self.database:
                         self.cursor.execute(
                             "INSERT INTO errors (error) VALUES (?)", self.errors[url])
                     continue
-                placeholder, url = self.siteValidation(url)
+                placeholder, url = self.siteValidation(url) ### Wasn't siteValidation just called, why call it again? Especialy if it is a slow (e.g. network) method
                 if not self.screenshotDir:
                     if self.database:
                         try:
