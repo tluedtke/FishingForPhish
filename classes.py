@@ -726,8 +726,10 @@ class image(scrape):
         totalTags = self.BS.find_all()
         selTotalTags = self.driver.find_elements(By.XPATH, "//*")
         linkTags = self.driver.find_elements(By.TAG_NAME, "link")
-        features = []
-
+        ### Terry ### If this was a dictionary, it would be selfdocumenting (e.g. names to values), 
+        ### Terry ### and easier to modify (can add new value types anywhere without worrying about array order)
+        features = [] 
+        
         # LAYOUT
         # Get the total number of tags DIRECTLY in the HTML tag using Beautiful
         # Soup
@@ -982,7 +984,7 @@ class image(scrape):
                 i += 1
             if self.database:
                 for features in self.imageFeatures:
-                    self.cursor.execute("INSERT INTO results () VALUES ()", )
+                    self.cursor.execute("INSERT INTO results () VALUES ()", ) ### Terry ### What is being inserted?
                 self.cursor.commit()
 
 
@@ -1229,6 +1231,7 @@ class combine(image, page):
         '''A function that creates the initial datasets for feature selection. 2 particular arrays
         are defined, imageAttNames and pageAttNames, which contain the attribute type and name for
         each respective attribute.'''
+        ### Terry ### Why not use dictionaries in the first place to associate name and value?
         imageAtts = []
         imageAttNames = [
             Attribute.create_numeric("Total Width (px)"),
