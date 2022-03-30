@@ -8,6 +8,16 @@ results in a dictionary, then storing them would be identical to each analyzer a
 by the fisher. Alternatively, each analyzer could be responsible for storing its own results, 
 but that flexibility is more complicated.
 
+Additional thoughts on testing. Separating out the analyzers allows each one to be tested separately.
+Unit tests can send a specific URL, based on a local file in test data, to the analyze function and then
+validate the returned results are what are expected from that file, or that expected exceptions are thrown. 
+Analyzers that retrieve addional data,  e.g. follow img links, can also be tested, but the URL needs to be  
+file based URL (file:///path) so that  relative links also look on disk for the test data (versus depending 
+on an HTTP server that might be down, or change data so results change). 
+
+Likewise, unit tests for goFish could add analyzers with specific behaviors that can be tested against the 
+fishing actions (storing results, caching files, etc).
+
 The basic shell is:
 """
 
