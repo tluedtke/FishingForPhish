@@ -13,15 +13,15 @@ You can do that by creating an instance of the class initialize and then calling
 
 .. code-block:: python
 
-   from classes import initialize
+   from classes import startFishing
    
-   run = initialize(dataDir="data")
+   run = startFishing(dataDir="data")
    run.initializeAll()
    
    # Additionally call .closeSelenium() to close and quit the webdriver process
    run.closeSelenium()
 
-The initialize class has 3 attributes:
+The initialize class has 4 attributes:
 
 * dataDir=None
       The home directory for the scraped files. This includes a screenshots, html, css, and datasets directory. If left None, an empty
@@ -29,19 +29,23 @@ The initialize class has 3 attributes:
 * driver=None
       The instance of Selenium Webdriver. In most cases, this will be None (unless a webdriver instance has already been created; in which case
       the initialization process for it can be skipped).
+* jvmToggle=False
+      A toggle attribute that follows the state of the jvm (as python weka wrapper currently doesn't support checking the current run state of the jvm). A value should **NOT** be passed for this variable, otherwise functions reliant on the jvm can be called before the jvm's initialization.
 * BS=None
       The instance of Beautiful Soup. In most cases, this will also be None (unless a Beautiful Soup object has been created). For the purposes of this library,       initializing a Beautiful Soup instance requires html, which is why the initializeBS() method of the initialize class is not included in the                     initializeAll() method.
       
-The initialize class has 4 methods in addition to __init__() and initializeAll():
+The initialize class has 5 methods in addition to __init__():
 
 * installResources(self)
       Installs potentially-useful resources used during the methodology of the research here: TODO. This includes the chiSquaredAttributeEval feature selector for WEKA, the SMOTE oversampler for WEKA, and the Wayback Machine add-on for Firefox.
 * initializeSelenium(self, add_ons=None)
       Creates the Selenium instance. A list of paths to add_ons (.xpi files) can be passed to enhance the scraping experience. The wayback_machine add-on is added to the webdriver instance with the method initializeAll().
 * initializePWW3(self, jvmOptions)
-      Starts JVM with a list of optional parameters, jvmOptions (some default options, system_cp and packages, are passed with the initializeAll() method).
+      Starts JVM with a list of optional parameters, jvmOptions (some default options, system_cp and packages, are passed with the initializeAll() method). The attribute jvmToggle is updated to be True.
 * initializeBS(self, html)
       Creates a Beautiful Soup instance BS. Not called with initializeAll() as it cannot parse html without having any html as input. Typically called after storing the driver.page_source in an html variable.
+* initializeAll(self, jvmOptions=["system_cp", "packages"], add_ons=['wayback_machine-3.0-fx.xpi'])
+      As used in the example above, sequentially handles logging accordingly (to avoid console spam), calls initializePWW3 (with the default options, system_cp and packages. Packages must be True if you want to use any packages), installResources(), and then initializeSelenium using the specified add_ons, which defaults to the installed 'wayback_machine-3.0-fx.xpi' from the call to installResources. This method can be adapted, but currently defaults to using the settings used during the research at TODO. 
 
 scrape
 ------
